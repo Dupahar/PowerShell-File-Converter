@@ -1,0 +1,8 @@
+{
+  "watchFolder": "C:\\Users\\mahaj\\OneDrive\\Documents\\WatchFolder",
+  "logFile": "C:\\Users\\mahaj\\Downloads\\fileflow\\engine\\FileFlow.log",
+  "libreOfficePath": "C:\\Program Files\\LibreOffice\\program\\soffice.exe",
+  "maxRetries": 5,
+  "retryDelaySec": 5,
+  "scanIntervalSec": 15
+}
