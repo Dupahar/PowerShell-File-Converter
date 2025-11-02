@@ -1,170 +1,166 @@
-FileFlow for Windows 📁➡️📄
+# FileFlow for Windows 📁➡️📄
 
+A powerful, headless automation engine for Windows that monitors folders and automatically converts documents to PDF. Designed as a robust "set-and-forget" background service, hardened to work reliably with cloud-synced folders like OneDrive.
 
+> Academic Project: Developed as a Major Project for the B.Tech (AI & MI) program at the University of Jammu.
 
-FileFlow is a powerful, headless automation engine for Windows that monitors a folder for new documents and automatically converts them to PDF. It is designed to be a robust "set-and-forget" background service, hardened to work reliably with cloud-synced folders like OneDrive.
+## ✨ Key Features
 
+- Automatic Conversion – Monitors a designated folder and converts new `.docx` files to `.pdf` automatically
+- Cloud-Sync Resilient – Built to handle file locks from services like OneDrive using intelligent retry mechanisms
+- Fully Configurable – All paths and settings managed through a simple `config.json` file
+- Silent Background Operation – Runs invisibly using Windows Task Scheduler, starting automatically at login
+- Robust & Stable – Processes files serially with file-locking to prevent duplicate processing
+- Easy Installation – Automated setup via `install.ps1` script
 
+## 📋 Prerequisites
 
-This project was developed as a Major Project for the B.Tech (AI \& MI) program at the University of Jammu.
+Before installing FileFlow, ensure you have:
 
+- Windows 10/11
+- PowerShell 5.1+ (pre-installed on Windows)
+- LibreOffice – [Download here](https://www.libreoffice.org/download/download-libreoffice/)
+  - Default installation path: `C:\Program Files\LibreOffice`
 
+## ⚙️ Installation
 
-Key Features ✨
+### 1. Download the Project
 
+Clone or download this repository to your computer:
 
+```bash
+git clone https://github.com/Dupahar/PowerShell-File-Converter.git
+cd PowerShell-File-Converter
+```
 
-\- Automatic Conversion: Monitors a "watch folder" and automatically converts new .docx files to .pdf.
+Or download and extract the ZIP to a location like:
+```
+C:\Users\YourUser\Downloads\fileflow
+```
 
-\- Cloud-Sync Aware: Built to be resilient against file locks from services like OneDrive, using a smart retry mechanism.
+### 2. Configure FileFlow
 
-\- Fully Configurable: All paths and settings are managed in a simple config.json file.
+Open `config.json` in a text editor and update the paths to match your system:
 
-\- Silent Background Service: Runs completely invisibly in the background using the Windows Task Scheduler, starting automatically when you log in.
+```json
+{
+  "watchFolder": "C:\\Users\\YourUser\\OneDrive\\Documents\\WatchFolder",
+  "logFile": "C:\\Users\\YourUser\\Downloads\\fileflow\\engine\\FileFlow.log",
+  "libreOfficePath": "C:\\Program Files\\LibreOffice\\program\\soffice.exe",
+  "maxRetries": 5,
+  "retryDelaySec": 5,
+  "scanIntervalSec": 15
+}
+```
 
-\- Robust \& Stable: Processes files serially to ensure stability and uses a file-locking system to prevent duplicate processing.
+Configuration Options:
+- `watchFolder` – Directory to monitor for new `.docx` files
+- `logFile` – Path where conversion logs will be saved
+- `libreOfficePath` – Path to LibreOffice executable
+- `maxRetries` – Number of conversion retry attempts
+- `retryDelaySec` – Seconds to wait between retries
+- `scanIntervalSec` – Folder scan frequency in seconds
 
-\- Easy Installation: Comes with an install.ps1 script to automatically set up the background task.
+### 3. Run the Installer
 
+Important: The installer must be run with Administrator privileges.
 
+1. Right-click PowerShell or Windows Terminal and select Run as Administrator
+2. Navigate to the project directory:
+   ```powershell
+   cd C:\Users\YourUser\Downloads\fileflow
+   ```
+3. Run the installer:
+   ```powershell
+   .\install.ps1
+   ```
 
-Installation ⚙️
+You should see a success message confirming the background task was created.
 
+## 🚀 Usage
 
+Once installed, FileFlow runs automatically in the background.
 
-Follow these steps to get FileFlow running on your system.
+### Starting FileFlow
 
+- First Time: Log out and log back in to trigger the background task
+- Subsequent Runs: FileFlow starts automatically at each login
 
+### Converting Documents
 
-1\. \*\*Prerequisites:\*\*
+1. Save or move any `.docx` file into your configured `watchFolder`
+2. FileFlow scans every 15 seconds (configurable)
+3. After conversion, both the PDF and original `.docx` will be moved to a `processed` subfolder
 
-&nbsp;  - Windows 10/11  
+### Monitoring Activity
 
-&nbsp;  - PowerShell 5.1 (comes pre-installed)  
+View the log file specified in `config.json` (default: `engine\FileFlow.log`) to check:
+- Conversion status
+- Error messages
+- Processing history
 
-&nbsp;  - LibreOffice: Download and install from the \[official website](https://www.libreoffice.org/download/download-libreoffice/).  
+## ⚙️ How It Works
 
-&nbsp;    The script assumes the default installation path:
+FileFlow uses a polling-based system for maximum reliability:
 
-&nbsp;    ```
+1. Monitoring – The `Start-FileFlow.ps1` script runs in a loop, scanning the `watchFolder` periodically
+2. File Locking – Detected files are "locked" to prevent duplicate processing
+3. Cloud-Sync Handling – Implements retry logic to handle OneDrive/cloud service file locks
+4. Conversion – Uses LibreOffice in headless mode to convert documents to PDF
+5. Organization – Moves processed files to a `processed` subfolder
 
-&nbsp;    C:\\Program Files\\LibreOffice
+This architecture ensures that even with synchronization delays, files are eventually processed correctly.
 
-&nbsp;    ```
+## 🗂️ Project Structure
 
+```
+fileflow/
+├── engine/
+│   ├── Start-FileFlow.ps1    # Main monitoring script
+│   └── FileFlow.log           # Activity log (created at runtime)
+├── config.json                # Configuration file
+├── install.ps1                # Installation script
+└── README.md                  # This file
+```
 
+## 🛠️ Troubleshooting
 
-2\. \*\*Download the Project:\*\*  
+### FileFlow isn't processing files
 
-&nbsp;  Clone or download this repository to a location on your computer, for example:  
+1. Check that the background task is running:
+   - Open Task Scheduler
+   - Look for "FileFlow Background Service"
+   - Verify it's enabled and running
 
-&nbsp;  ```
+2. Review the log file for errors
+3. Ensure LibreOffice is installed at the specified path
+4. Verify the `watchFolder` path is correct and accessible
 
-&nbsp;  C:\\Users\\YourUser\\Downloads\\fileflow
+### Files aren't converting
 
-&nbsp;  ```
+- Ensure files are `.docx` format
+- Check that LibreOffice path in `config.json` is correct
+- Look for lock file issues in the logs
+- Try manually running: `.\engine\Start-FileFlow.ps1`
 
+### Uninstalling FileFlow
 
+1. Open Task Scheduler as Administrator
+2. Find and delete "FileFlow Background Service"
+3. Delete the project folder
 
-3\. \*\*Configure FileFlow:\*\*  
+## 📝 License
 
-&nbsp;  Open the `config.json` file in the main project directory with a text editor.  
+This project is part of academic coursework for B.Tech (AI & MI) at the University of Jammu.
 
-&nbsp;  Review and update the paths to match your system.
+## 👥 Contributors
 
+- [Dupahar](https://github.com/Dupahar)
 
+## 🤝 Contributing
 
-&nbsp;  ```
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/Dupahar/PowerShell-File-Converter/issues).
 
-&nbsp;  {
+---
 
-&nbsp;    "watchFolder": "C:\\\\Users\\\\mahaj\\\\OneDrive\\\\Documents\\\\WatchFolder",
-
-&nbsp;    "logFile": "C:\\\\Users\\\\mahaj\\\\Downloads\\\\fileflow\\\\engine\\\\FileFlow.log",
-
-&nbsp;    "libreOfficePath": "C:\\\\Program Files\\\\LibreOffice\\\\program\\\\soffice.exe",
-
-&nbsp;    "maxRetries": 5,
-
-&nbsp;    "retryDelaySec": 5,
-
-&nbsp;    "scanIntervalSec": 15
-
-&nbsp;  }
-
-&nbsp;  ```
-
-
-
-4\. \*\*Run the Installer:\*\*  
-
-&nbsp;  The installer will automatically create the Windows Task Scheduler job to run FileFlow silently in the background.
-
-
-
-&nbsp;  - Right-click the PowerShell or Windows Terminal icon and select \*\*Run as Administrator\*\*.
-
-&nbsp;  - Navigate to the project directory:
-
-&nbsp;    ```
-
-&nbsp;    cd C:\\Users\\mahaj\\Downloads\\fileflow
-
-&nbsp;    ```
-
-&nbsp;  - Run the installer:
-
-&nbsp;    ```
-
-&nbsp;    .\\install.ps1
-
-&nbsp;    ```
-
-
-
-&nbsp;  You should see a success message confirming that the background task was created.
-
-
-
-Usage 🚀
-
-
-
-Once installed, FileFlow runs automatically.
-
-
-
-\- \*\*Log Out and Log Back In:\*\* This will trigger the background task to start for the first time.  
-
-\- \*\*Drop Files:\*\* Simply save or move any `.docx` file into the `watchFolder` you specified in your configuration.  
-
-\- \*\*Check for PDFs:\*\* After a short delay (the script scans every 15 seconds), a PDF version of your file will appear in a subfolder named `processed` inside your watchFolder.  
-
-&nbsp; The original `.docx` file will also be moved there.
-
-
-
-To check the status or see a history of conversions, you can view the log file specified in your `config.json` (`engine\\FileFlow.log`).
-
-
-
-How It Works ⚙️
-
-
-
-FileFlow uses a polling-based system for maximum reliability.  
-
-The main `Start-FileFlow.ps1` script runs in a loop, scanning the `watchFolder` periodically.  
-
-To handle conflicts with cloud services like OneDrive, it implements a retry loop and a file-locking mechanism.
-
-
-
-If a file is detected, it is "locked" to prevent re-processing.  
-
-If the conversion fails because the file is in use, the script waits and retries several times before logging an error.  
-
-This ensures that even with synchronization delays, the file is eventually processed correctly.
-
-
-
+Note: This is an academic project and may require additional hardening for production use.
